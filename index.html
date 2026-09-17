@@ -1,0 +1,21 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GCA FORCE-IPTV PRO — Administration</title>
+<style>
+body{font-family:Arial;background:#050b16;color:#fff;padding:30px;max-width:1100px;margin:auto}
+input,button{padding:12px;border-radius:8px;border:1px solid #25608c;background:#0b1526;color:#fff}input{width:360px}button{background:#0798ed;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:20px}.card{background:#0b1526;border:1px solid #167bd0;border-radius:12px;padding:20px}.muted{color:#8da5bf}.ok{color:#62f0bf}.err{color:#ff8080}
+</style></head><body>
+<h1>GCA FORCE-IPTV PRO — Administration</h1><p class="muted">Connexion au backend REST</p>
+<p><input id="api" value="http://localhost:8080/"><button onclick="connect()">Tester le backend</button></p><p id="msg">Backend non testé.</p>
+<div class="grid" id="stats"></div>
+<script>
+function connect(){const base=document.getElementById("api").value.replace(/\/+$/,"");localStorage.setItem("gca_api",base);
+document.getElementById("msg").textContent="Test en cours…";
+fetch(base+"/health",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("HTTP "+r.status);return r.json()})
+.then(x=>{document.getElementById("msg").className="ok";document.getElementById("msg").textContent="✓ Backend accessible : "+x.service;loadStats(base)})
+.catch(e=>{document.getElementById("msg").className="err";document.getElementById("msg").textContent="✗ Backend inaccessible : "+e.message+" — démarre backend/start-windows.bat puis reteste."})}
+function loadStats(base){const token=prompt("Colle le token admin obtenu après connexion à l'application (sans 'Bearer')");if(!token)return;
+fetch(base+"/api/admin/overview",{headers:{Authorization:"Bearer "+token}}).then(r=>r.json()).then(x=>{
+document.getElementById("stats").innerHTML=Object.entries(x).map(([k,v])=>`<div class="card"><h2>${v}</h2><div class="muted">${k}</div></div>`).join("")})}
+document.getElementById("api").value=localStorage.getItem("gca_api")||"http://localhost:8080/";
+</script></body></html>
